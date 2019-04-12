@@ -23,7 +23,7 @@ fun ApplicationCall.resolveResource(
         return null
     }
 
-    val normalizedPath = (resourcePackage.orEmpty().split('.') +
+    val normalizedPath = (resourcePackage.orEmpty().split('.', '/', '\\') +
         path.split('/', '\\')).normalizePathComponents().joinToString("/")
 
     // note: we don't need to check for .. in the normalizedPath because all .. get replaced with //
