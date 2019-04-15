@@ -15,15 +15,17 @@ internal suspend fun HttpCacheEntry(response: HttpResponse): HttpCacheEntry {
     return HttpCacheEntry(response.cacheExpires(), response.varyKeys(), response, body)
 }
 
+/**
+ * Client single response cache with [expires] and [varyKeys].
+ */
 @KtorExperimentalAPI
+@Suppress("KDocMissingDocumentation")
 class HttpCacheEntry internal constructor(
-    internal val expires: GMTDate,
-    internal val varyKeys: Map<String, String>,
-    internal val response: HttpResponse,
-    internal val body: ByteArray
+    val expires: GMTDate,
+    val varyKeys: Map<String, String>,
+    val response: HttpResponse,
+    val body: ByteArray
 ) {
-    internal val requestHeaders: Headers = response.call.request.headers
-
     internal val responseHeaders: Headers = Headers.build {
         appendAll(response.headers)
     }
@@ -34,6 +36,16 @@ class HttpCacheEntry internal constructor(
         call.request = HttpCacheRequest(call, response.call.request)
 
         return call.response
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is HttpCacheEntry) return false
+        if (other === this) return true
+        return varyKeys == other.varyKeys
+    }
+
+    override fun hashCode(): Int {
+        return varyKeys.hashCode()
     }
 }
 

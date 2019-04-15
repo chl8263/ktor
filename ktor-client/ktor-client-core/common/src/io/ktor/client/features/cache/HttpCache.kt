@@ -3,6 +3,7 @@ package io.ktor.client.features.cache
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.features.*
+import io.ktor.client.features.cache.storage.*
 import io.ktor.client.request.*
 import io.ktor.client.response.*
 import io.ktor.http.*
@@ -39,9 +40,11 @@ class HttpCache(
         /**
          * Storage for private cache entries.
          *
-         * [HttpCacheStorage.Disabled] by default.
+         * [HttpCacheStorage.Unlimited] by default.
+         *
+         * Consider using [HttpCacheStorage.Disabled] if the client used as intermediate.
          */
-        var privateStorage: HttpCacheStorage = HttpCacheStorage.Disabled
+        var privateStorage: HttpCacheStorage = HttpCacheStorage.Unlimited()
     }
 
     companion object : HttpClientFeature<Config, HttpCache> {

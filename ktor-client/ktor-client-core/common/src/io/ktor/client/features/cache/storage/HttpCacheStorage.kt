@@ -1,5 +1,6 @@
-package io.ktor.client.features.cache
+package io.ktor.client.features.cache.storage
 
+import io.ktor.client.features.cache.HttpCacheEntry
 import io.ktor.client.response.*
 import io.ktor.http.*
 import io.ktor.util.*
@@ -23,7 +24,7 @@ abstract class HttpCacheStorage {
     /**
      * Find all matched [HttpCacheEntry] for [url].
      */
-    abstract fun findByUrl(url: Url): List<HttpCacheEntry>
+    abstract fun findByUrl(url: Url): Set<HttpCacheEntry>
 
     companion object {
         /**
