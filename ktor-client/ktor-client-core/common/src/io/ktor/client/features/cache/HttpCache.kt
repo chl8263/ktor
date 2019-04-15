@@ -16,14 +16,32 @@ internal object CacheControl {
     internal val MUST_REVALIDATE = HeaderValue("must-revalidate")
 }
 
+/**
+ * This feature allow to use HTTP cache.
+ *
+ * For detailed description follow: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+ */
 class HttpCache(
     private val publicStorage: HttpCacheStorage,
     private val privateStorage: HttpCacheStorage
 ) {
+    /**
+     * [HttpCache] configuration.
+     */
     class Config {
-        var publicStorage: HttpCacheStorage = HttpCacheStorage.Default
+        /**
+         * Storage for public cache entries.
+         *
+         * Use [HttpCacheStorage.Unlimited] by default.
+         */
+        var publicStorage: HttpCacheStorage = HttpCacheStorage.Unlimited()
 
-        var privateStorage: HttpCacheStorage = HttpCacheStorage.Empty
+        /**
+         * Storage for private cache entries.
+         *
+         * [HttpCacheStorage.Disabled] by default.
+         */
+        var privateStorage: HttpCacheStorage = HttpCacheStorage.Disabled
     }
 
     companion object : HttpClientFeature<Config, HttpCache> {
@@ -98,7 +116,7 @@ class HttpCache(
         val cacheControl = response.cacheControl()
 
         val storage = if (CacheControl.PRIVATE in cacheControl) privateStorage else publicStorage
-        val cache = storage.find(url, response.varyKeys())
+        val cache = storage.find(url, response.varyKeys()) ?: return null
 
         storage.store(url, HttpCacheEntry(response.cacheExpires(), response.varyKeys(), cache.response, cache.body))
         return cache.produceResponse()
