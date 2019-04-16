@@ -62,7 +62,7 @@ interface HttpResponse : HttpMessage, CoroutineScope, Closeable {
             content.discard()
         }
         @Suppress("UNCHECKED_CAST")
-        (coroutineContext[Job] as CompletableDeferred<Unit>).complete(Unit)
+        (coroutineContext[Job] as CompletableJob).complete()
     }
 }
 

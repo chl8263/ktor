@@ -1,12 +1,11 @@
 package io.ktor.server.testing
 
-import io.ktor.http.content.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.server.engine.*
 import io.ktor.util.*
-import io.ktor.util.cio.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.io.*
 import java.time.*
@@ -54,7 +53,7 @@ class TestApplicationResponse(
      * A response could have no channel assigned in some particular failure cases so the deferred could
      * remain incomplete or become completed exceptionally.
      */
-    internal val responseChannelDeferred = CompletableDeferred<Unit>()
+    internal val responseChannelDeferred: CompletableJob = Job()
 
     override fun setStatus(statusCode: HttpStatusCode) {}
 
@@ -85,7 +84,7 @@ class TestApplicationResponse(
         }
 
         responseChannel = result
-        responseChannelDeferred.complete(Unit)
+        responseChannelDeferred.complete()
 
         return result
     }
@@ -121,12 +120,12 @@ class TestApplicationResponse(
     }
 
     // Websockets & upgrade
-    private val webSocketCompleted: CompletableDeferred<Unit> = CompletableDeferred()
+    private val webSocketCompleted: CompletableJob = Job()
 
     override suspend fun respondUpgrade(upgrade: OutgoingContent.ProtocolUpgrade) {
         upgrade.upgrade(call.receiveChannel(), responseChannel(), Dispatchers.Default, Dispatchers.Unconfined)
             .invokeOnCompletion {
-                webSocketCompleted.complete(Unit)
+                webSocketCompleted.complete()
             }
     }
 

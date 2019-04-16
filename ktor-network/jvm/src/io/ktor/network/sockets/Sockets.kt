@@ -14,7 +14,7 @@ interface ASocket : Closeable, DisposableHandle {
      * Represents a socket lifetime, completes at socket closure
      */
     @KtorExperimentalAPI
-    val socketContext: Deferred<Unit>
+    val socketContext: Job
 
     override fun dispose() {
         try {
@@ -32,7 +32,7 @@ val ASocket.isClosed: Boolean get() = socketContext.isCompleted
 /**
  * Await until socket close
  */
-suspend fun ASocket.awaitClosed(): Unit = socketContext.await()
+suspend fun ASocket.awaitClosed(): Unit = socketContext.join()
 
 /**
  * Represent a connected socket

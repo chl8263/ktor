@@ -26,7 +26,7 @@ open class JettyApplicationEngineBase(
     }
 
     private val configuration = Configuration().apply(configure)
-    private var cancellationDeferred: CompletableDeferred<Unit>? = null
+    private var cancellationDeferred: CompletableJob? = null
 
     /**
      * Jetty server instance being configuring and starting
@@ -49,7 +49,7 @@ open class JettyApplicationEngineBase(
     }
 
     override fun stop(gracePeriod: Long, timeout: Long, timeUnit: TimeUnit) {
-        cancellationDeferred?.complete(Unit)
+        cancellationDeferred?.complete()
         environment.monitor.raise(ApplicationStopPreparing, environment)
         server.stopTimeout = timeUnit.toMillis(timeout)
         server.stop()

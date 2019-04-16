@@ -22,7 +22,7 @@ class RawWebSocket(
     coroutineContext: CoroutineContext,
     pool: ObjectPool<ByteBuffer> = KtorDefaultPool
 ) : WebSocketSession {
-    private val socketJob = CompletableDeferred<Unit>(coroutineContext[Job])
+    private val socketJob: CompletableJob = Job(coroutineContext[Job])
 
     override val coroutineContext: CoroutineContext = coroutineContext + socketJob
 

@@ -155,8 +155,8 @@ class WebSocketWriter(
     }
 
     private class FlushRequest(parent: Job?) {
-        private val done = CompletableDeferred<Unit>(parent)
-        fun complete() = done.complete(Unit)
-        suspend fun await() = done.await()
+        private val done: CompletableJob = Job(parent)
+        fun complete(): Boolean = done.complete()
+        suspend fun await(): Unit = done.join()
     }
 }

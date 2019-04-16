@@ -22,7 +22,7 @@ internal class JsClientEngine(override val config: HttpClientEngineConfig) : Htt
     override suspend fun execute(
         data: HttpRequestData
     ): HttpResponseData {
-        val callContext = CompletableDeferred<Unit>(this@JsClientEngine.coroutineContext[Job]) + dispatcher
+        val callContext: CoroutineContext = Job(this@JsClientEngine.coroutineContext[Job]) + dispatcher
 
         if (data.isUpgradeRequest()) {
             return executeWebSocketRequest(data, callContext)
@@ -54,7 +54,7 @@ internal class JsClientEngine(override val config: HttpClientEngineConfig) : Htt
         val urlString = request.url.toString()
         val socket: WebSocket = if (PlatformUtils.IS_NODE) {
             val ws = js("require('ws')")
-            js("new ws(urlString)")
+            js("new ws(urlString)") as WebSocket
         } else {
             WebSocket(urlString)
         }

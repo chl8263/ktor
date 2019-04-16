@@ -3,7 +3,6 @@ package io.ktor.server.testing
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
-import io.ktor.http.content.*
 import io.ktor.response.*
 import io.ktor.server.engine.*
 import io.ktor.util.*
@@ -13,7 +12,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.future.*
 import kotlinx.coroutines.io.*
-import java.lang.IllegalStateException
 import java.util.concurrent.*
 import kotlin.coroutines.*
 
@@ -187,10 +185,10 @@ class TestApplicationEngine(
 
         // we need this to wait for response channel appearance
         // otherwise we get NPE at websocket reader start attempt
-        val responseSent = CompletableDeferred<Unit>()
+        val responseSent: CompletableJob = Job()
         call.response.responseChannelDeferred.invokeOnCompletion { cause ->
             when (cause) {
-                null -> responseSent.complete(Unit)
+                null -> responseSent.complete()
                 else -> responseSent.completeExceptionally(cause)
             }
         }
@@ -211,11 +209,13 @@ class TestApplicationEngine(
         val webSocketContext = engineContext + job
 
         runBlocking(configuration.dispatcher) {
-            responseSent.await()
+            responseSent.join()
             processResponse(call)
 
             val writer = WebSocketWriter(websocketChannel, webSocketContext, pool = pool)
-            val reader = WebSocketReader(call.response.websocketChannel()!!, webSocketContext, Int.MAX_VALUE.toLong(), pool)
+            val reader = WebSocketReader(
+                call.response.websocketChannel()!!, webSocketContext, Int.MAX_VALUE.toLong(), pool
+            )
 
             try {
                 // execute client side
