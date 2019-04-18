@@ -1,26 +1,26 @@
-
-val serialization_version = extra["serialization_version"]
+val serialization_version: String by project.extra
 
 kotlin.sourceSets {
-    val commonMain by getting {
+    commonMain {
         dependencies {
             api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version")
             api(project(":ktor-client:ktor-client-features:ktor-client-json"))
         }
     }
 
-    val jvmMain by getting {
+    jvmMain {
         dependencies {
             api("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version")
         }
     }
 
-    val jsMain by getting {
+    jsMain {
         dependencies {
             api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version")
         }
     }
-    val posixMain by getting {
+
+    posixMain {
         dependencies {
             api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$serialization_version")
         }
