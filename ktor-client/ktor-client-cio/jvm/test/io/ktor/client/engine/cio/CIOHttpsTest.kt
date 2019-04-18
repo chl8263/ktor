@@ -1,6 +1,5 @@
 package io.ktor.client.engine.cio
 
-import ch.qos.logback.classic.*
 import io.ktor.application.*
 import io.ktor.client.request.*
 import io.ktor.client.response.*
@@ -16,8 +15,6 @@ import io.ktor.server.jetty.*
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import org.junit.*
-import org.slf4j.*
-import org.slf4j.Logger
 import java.io.*
 import java.security.*
 import javax.net.ssl.*

@@ -11,7 +11,9 @@ import kotlin.coroutines.*
  */
 @KtorExperimentalAPI
 abstract class SelectorManagerSupport internal constructor() : SelectorManager {
-    final override val provider: SelectorProvider = SelectorProvider.provider()
+
+    val provider: SelectorProvider = SelectorProvider.provider()
+
     /**
      * Number of pending selectables
      */
@@ -30,15 +32,15 @@ abstract class SelectorManagerSupport internal constructor() : SelectorManager {
     final override suspend fun select(selectable: Selectable, interest: SelectInterest) {
         require(selectable.interestedOps and interest.flag != 0)
 
-        suspendCancellableCoroutine<Unit> { c ->
-//            val c = base.tracked()  // useful for debugging
+        suspendCancellableCoroutine<Unit> { continuation ->
+//            val continuation = base.tracked()  // useful for debugging
 
-            c.invokeOnCancellation {
+            continuation.invokeOnCancellation {
                 selectable.dispose()
             }
-            selectable.suspensions.addSuspension(interest, c)
+            selectable.suspensions.addSuspension(interest, continuation)
 
-            if (!c.isCancelled) {
+            if (!continuation.isCancelled) {
                 publishInterest(selectable)
             }
         }
@@ -101,15 +103,15 @@ abstract class SelectorManagerSupport internal constructor() : SelectorManager {
     /**
      * Applies selectable's current interest (should be invoked in selection thread)
      */
-    protected fun applyInterest(selector: Selector, s: Selectable) {
+    protected fun applyInterest(selector: Selector, selectable: JvmSelectable) {
         try {
-            val channel = s.channel
+            val channel = selectable.channel
             val key = channel.keyFor(selector)
-            val ops = s.interestedOps
+            val ops = selectable.interestedOps
 
             if (key == null) {
                 if (ops != 0) {
-                    channel.register(selector, ops, s)
+                    channel.register(selector, ops, selector)
                 }
             } else {
                 if (key.interestOps() != ops) {
@@ -120,9 +122,9 @@ abstract class SelectorManagerSupport internal constructor() : SelectorManager {
             if (ops != 0) {
                 pending++
             }
-        } catch (t: Throwable) {
-            s.channel.keyFor(selector)?.cancel()
-            cancelAllSuspensions(s, t)
+        } catch (cause: Throwable) {
+            selectable.channel.keyFor(selector)?.cancel()
+            cancelAllSuspensions(selectable, cause)
         }
     }
 

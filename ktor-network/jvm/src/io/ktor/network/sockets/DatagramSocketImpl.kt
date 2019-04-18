@@ -67,12 +67,10 @@ internal class DatagramSocketImpl(override val channel: DatagramChannel, selecto
 
         val address = try {
             channel.receive(buffer)
-        } catch (t: Throwable) {
+        } catch (cause: Throwable) {
             DefaultDatagramByteBufferPool.recycle(buffer)
-            throw t
-        }
-
-        if (address == null) return receiveSuspend(buffer)
+            throw cause
+        } ?: return receiveSuspend(buffer)
 
         interestOp(SelectInterest.READ, false)
         buffer.flip()
